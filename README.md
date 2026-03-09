@@ -1,164 +1,102 @@
-# Twin Descriptor Schema Guide
+# template-twin-descriptor
 
-## Configuration Schema Structure For Desired Properties
+Starter template for Phystack twin descriptors. Used by `@phystack/cli` to scaffold a new twin descriptor project.
 
-This section provides an overview of the desired properties schema definition for twin descriptors. The schema definition determines how your twin's configuration form renders in the Console and establishes validation rules for your twin's desired property values.
+## Overview
 
-## Annotations Usage
+A twin descriptor defines the schema for a digital twin on the Phystack platform -- its actions, events, desired properties, and reported properties. This template provides a working example that developers can customize after scaffolding. The TypeScript schema is compiled to JSON Schema at build time and published to the platform via the Phystack CLI.
 
-For optimal development experience, we recommend implementing descriptor schemas in TypeScript. This approach offers enhanced maintainability and type safety. Upon publication, your TypeScript schema will be automatically converted to standardized JSON Schema format.
+## Tech Stack
 
-TypeScript field annotations are translated into corresponding JSON schema properties:
+| Layer | Technology |
+|-------|------------|
+| Language | TypeScript 5 |
+| Runtime | Node.js 20+ |
+| Schema compiler | `@phygrid/ts-schema` |
+| CLI | `@phygrid/cli` (`phy`) |
+| Package manager | Yarn 1.x |
 
-```javascript
-/**
- * @title Configuration Name
- * @default "Default Configuration"
- * @minLength 3
- * @maxLength 50
- */
-configurationName: string;
+## Prerequisites
+
+- Node.js 20+
+- Yarn
+- Phystack CLI (`phy`) installed globally or via npx
+
+## Getting Started
+
+```bash
+# Scaffold a new twin descriptor (via CLI)
+phy descriptor create my-descriptor
+
+# Or work directly from the template
+cd repos/template-twin-descriptor
+yarn install
+yarn build
 ```
 
-The following sections demonstrate annotation examples, including Phygrid-specific implementations.
+## Usage
 
-### Optional Properties
+### Scaffolding with the CLI
 
-By default, all schema properties are required. To designate a property as optional, append a `?` to the property name:
-
-```javascript
-  additionalConfig?: string;
+```bash
+phy descriptor create <name>
 ```
 
-### Title Annotation
+The CLI copies this template into a new directory, updates `package.json` with the descriptor name, and installs dependencies. From there you edit `src/schema.ts` to define your twin's contract.
 
-Use the title annotation to define a descriptive label that will be displayed in the Console:
-```javascript
-   * @title Connection Settings
+### Building
+
+```bash
+yarn build
 ```
 
-### Default Values
+This compiles `src/schema.ts` into JSON Schema and writes the output to `build/<version>/`.
 
-Specify default values for properties using the default annotation. String values must be enclosed in quotation marks:
-```javascript
-   * @default "Default value"
+### Publishing
+
+```bash
+yarn pub
+# or equivalently
+phy descriptor publish
 ```
 
-### Special Input Types
+Publishes the compiled schema to the Phystack platform so that the Console can render configuration forms and devices can validate payloads.
 
-#### Media Picker
+## Project Structure
 
-```javascript
-type Media = {
-  ref: 'media';
-  type: string;
-  id: string;
-  url: string;
-};
-
-export type Schema = {
-  /**
-   * @title Media
-   * @ui mediaPicker
-   */
-   media: Media;
-}
+```
+src/
+  schema.ts       # Twin descriptor schema (actions, events, properties)
+build/            # Compiled JSON Schema output (gitignored)
+package.json
+tsconfig.json
 ```
 
-#### Queue Picker
+## Schema Reference
 
-```javascript
-type Queue = {
-  /**
-   * @title Queue ID
-   */
-  queueId: string;
+The `Schema` interface in `src/schema.ts` has four top-level sections:
 
-  /**
-   * @title Organisation name
-   */
-  organization: string;
+| Section | Purpose |
+|---------|---------|
+| `actions` | RPC-style methods the twin exposes (params and return types) |
+| `events` | Events the twin can emit (payload types) |
+| `desiredProperties` | Configuration set from the Console (renders as a form) |
+| `reportedProperties` | Read-only state reported by the device |
 
-  /**
-   * @title Queue endpoint
-   */
-  queueEndpoint: string;
-};
+TypeScript annotations on `desiredProperties` control Console form rendering:
 
-export type Schema = {
-  /**
-   * @title Queue
-   * @ui queuePicker
-   */
-  queue: Queue;
-}
-```
+| Annotation | Effect |
+|------------|--------|
+| `@title` | Field label in the Console |
+| `@default` | Pre-filled default value |
+| `@widget color` | Color picker |
+| `@widget css` | CSS editor |
+| `@widget textarea` | Multi-line text input |
+| `@widget javascript` | JavaScript editor |
+| `@ui mediaPicker` | Media asset picker |
+| `@ui queuePicker` | Queue selector |
+| `@ui spacePicker` | Space selector (with optional filter types) |
 
-#### CSS Field
+## Related Documentation
 
-```javascript
-  /**
-   * @title CSS
-   * @widget css
-   */
-  css: string;
-```
-
-#### Color Picker
-
-```javascript
-  /**
-   * @title Color
-   * @widget color
-   */
-  color: string;
-```
-
-#### Textarea
-
-```javascript
-  /**
-   * @title Description
-   * @widget textarea
-   */
-  description: string;
-```
-
-#### JavaScript Field
-
-```javascript
-  /**
-   * @title JavaScript
-   * @widget javascript
-   */
-  js: string;
-```
-
-#### Boolean Toggle
-
-```javascript
-  /**
-   * @title Enable Feature
-   * @default true
-   */
-  isEnabled: boolean;
-```
-
-#### Space Picker
-
-Configure a space picker with filtering options:
-
-```javascript
-  /**
-   * @title Space
-   * @ui spacePicker
-   * @uiOptions { filterTypes: ["location", "section"], showOnlyWithExternalId: true }
-   */
-  space: { id: string; externalId: string };
-```
-
-Available filter types:
-- `location`
-- `section`
-- `floor`
-- `custom`
+- [Twin descriptor schema guide](https://docs.phystack.com/twin-descriptors) (platform docs)
