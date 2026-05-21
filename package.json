@@ -14,8 +14,8 @@
     "pub": "phy descriptor publish"
   },
   "devDependencies": {
-    "@phygrid/cli": "^4.4.18",
-    "@phygrid/ts-schema": "^4.4.18",
+    "@phystack/cli": "^6.0.0",
+    "@phystack/ts-schema": "^4.4.74",
     "@types/node": "^22.15.17",
     "cross-env": "^7.0.3",
     "shx": "^0.4.0",
